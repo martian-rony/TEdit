@@ -9,7 +9,6 @@ class Tedit:
         self.root.title("Untitled - Tedit")
         self.root.geometry("1100x700")
 
-        # Modern colour palette + syntax‑highlight colours
         self.colors = {
             "bg": "#1e1e1e",
             "fg": "#d4d4d4",
@@ -22,16 +21,14 @@ class Tedit:
             "comment": "#6a9955",
         }
 
-        self.filename = None          # path of the current file (used for Save)
-        self.tabs = []                # list of Text widgets, one per tab
+        self.filename = None         
+        self.tabs = []              
         self.setup_ui()
         self.bind_shortcuts()
 
-    # ------------------------------------------------------------------ UI
     def setup_ui(self):
         self.root.configure(bg=self.colors["bg"])
 
-        # --- Menubar ---------------------------------------------------
         self.menubar = tk.Menu(self.root)
         self.root.config(menu=self.menubar)
 
@@ -52,7 +49,6 @@ class Tedit:
         help_menu.add_command(label="About", command=self.show_about)
         self.menubar.add_cascade(label="Help", menu=help_menu)
 
-        # --- Main layout -----------------------------------------------
         self.main_container = tk.Frame(self.root, bg=self.colors["bg"])
         self.main_container.pack(fill=tk.BOTH, expand=True)
 
@@ -60,10 +56,10 @@ class Tedit:
         self.notebook = ttk.Notebook(self.main_container)
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
-        # Create the first (blank) tab
+
         self.create_tab()
 
-        # --- Status bar ------------------------------------------------
+
         self.status_var = tk.StringVar()
         self.status_var.set(" Tedit | Ready")
         self.status_bar = tk.Label(
@@ -77,16 +73,11 @@ class Tedit:
         )
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
-    # ----------------------------------------------------------------- Tabs
-    def create_tab(self, content=""):
-        """
-        Create a new notebook tab that contains a Text widget and its
-        scrollbar.  Optional *content* is inserted into the Text widget.
-        """
-        # ----- tab container -------------------------------------------------
+
+    def create_tab(self, content=""):     
         frame = tk.Frame(self.notebook, bg=self.colors["bg"])
 
-        # ----- text area -----------------------------------------------------
+    
         text = tk.Text(
             frame,
             font=("Consolas", 13),
@@ -101,28 +92,26 @@ class Tedit:
         )
         text.pack(fill=tk.BOTH, expand=True)
 
-        # ----- scrollbar (per‑tab) -------------------------------------------
+
         scrollbar = ttk.Scrollbar(frame, command=text.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         text.configure(yscrollcommand=scrollbar.set)
 
-        # ----- add tab to notebook --------------------------------------------
+   
         self.notebook.add(frame, text="Untitled")
-        self.tabs.append(text)          # keep a reference to the Text widget
+        self.tabs.append(text)    
 
-        # ----- optional initial content ---------------------------------------
+     
         if content:
             text.insert("1.0", content)
 
-        # ----- apply syntax highlighting for the initial text ---------------
+     
         self.apply_syntax_highlighting(text)
 
-        # ----- bind key events for live highlighting & status updates -------
         text.bind("<Key>", self.on_content_changed)
 
         return text
 
-    # ---------------------------------------------------------- File ops
     def new_file(self):
         self.create_tab()
         self.filename = None
@@ -174,9 +163,8 @@ class Tedit:
         self.save()
         self.set_title(self.filename)
 
-    # ----------------------------------------------------------- UI utils
+
     def bind_shortcuts(self):
-        # Bind to the root so shortcuts work no matter which widget has focus
         self.root.bind_all("<Control-n>", lambda e: self.new_file())
         self.root.bind_all("<Control-o>", lambda e: self.open_file())
         self.root.bind_all("<Control-s>", lambda e: self.save())
@@ -199,14 +187,13 @@ class Tedit:
             "and simple syntax highlighting built with Python."
         )
 
-    # ------------------------------------------------------- Highlighting
+
     def apply_syntax_highlighting(self, widget):
         """Very simple Python syntax highlighting."""
-        # clear old tags
+
         for tag in widget.tag_names():
             widget.tag_remove(tag, "1.0", tk.END)
 
-        # keywords
         keywords = [
             "def", "class", "import", "from", "if", "else", "elif", "return",
             "try", "except", "finally", "for", "while", "with", "as", "pass",
@@ -225,7 +212,7 @@ class Tedit:
                 start = end
         widget.tag_config("keyword", foreground=self.colors["keyword"])
 
-        # strings (double‑quoted)
+  
         start = "1.0"
         while True:
             pos = widget.search(r'"[^"\n]*"', start,
@@ -237,7 +224,6 @@ class Tedit:
             start = end
         widget.tag_config("string", foreground=self.colors["string"])
 
-        # comments
         start = "1.0"
         while True:
             pos = widget.search(r"#.*", start,
